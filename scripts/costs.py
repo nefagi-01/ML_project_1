@@ -3,7 +3,8 @@ import numpy as np
 
 def calculate_mse(e):
     """Calculate the mse for vector e."""
-    return 1/2*np.mean(e**2)
+    n = len(e)
+    return (1/(2*n))*np.dot(e,e.T)
 
 
 def calculate_mae(e):
