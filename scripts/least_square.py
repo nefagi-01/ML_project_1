@@ -1,6 +1,7 @@
 import numpy as np
 from gradient import compute_gradient,compute_stoch_gradient
 from costs import compute_loss,calculate_mse
+from proj1_helpers import batch_iter
 
 
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
