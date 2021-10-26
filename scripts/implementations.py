@@ -14,7 +14,7 @@ def compute_gradient(y, tx, w):
     return grad, err
 
 def sigmoid(t):
-   return np.reciprocal(1+np.exp(-t))
+    return np.reciprocal(1+np.exp(-t))
 
 def compute_loss_logistic(y, tx, w):
     tmp = sigmoid(tx.dot(w))
@@ -130,7 +130,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         # update w.
         grad = compute_gradient_logistic(y, tx, w)
         w = w - gamma * grad
-        print(compute_loss_logistic(y,tx,w))
     loss = compute_loss_logistic(y, tx, w)
     return w, loss
 
