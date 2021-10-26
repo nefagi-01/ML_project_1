@@ -14,20 +14,69 @@ def compute_gradient(y, tx, w):
     return grad, err
 
 def sigmoid(t):
-    return 1.0 / (1 + np.exp(-t))
+   return np.reciprocal(1+np.exp(-t))
 
 def compute_loss_logistic(y, tx, w):
-    pred = sigmoid(tx.dot(w))
-    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
-    return np.squeeze(- loss)
+    tmp = sigmoid(tx.dot(w))
+    loss = y.T.dot(np.log(tmp)) + (1 - y).T.dot(np.log(1 - tmp))
+    return -np.squeeze(loss)
 
 def compute_gradient_logistic(y, tx, w):
-    pred = sigmoid(tx.dot(w))
-    grad = tx.T.dot(pred - y)
+    tmp = sigmoid(tx.dot(w))
+    grad = tx.T.dot(tmp - y)
     return grad
 
-def remap(y):
-    return (y+1)/2
+def build_poly(x, degree):
+    poly = np.ones((len(x), 1))
+    for deg in range(1, degree+1):
+        poly = np.c_[poly, np.power(x, deg)]
+    return poly
+
+def build_k_indices(y, k_fold, seed):
+    num_row = y.shape[0]
+    interval = int(num_row / k_fold)
+    np.random.seed(seed)
+    indices = np.random.permutation(num_row)
+    k_indices = [indices[k * interval: (k + 1) * interval] for k in range(k_fold)]
+    return np.array(k_indices)
+
+def cross_validation(y, x, k_indices, k, lambda_, degree):
+    # get k'th subgroup in test, others in train
+    te_indice = k_indices[k]
+    tr_indice = [y for i,x in enumerate(k_indices) for y in x if i!=k]
+    y_te = y[te_indice]
+    y_tr = y[tr_indice]
+    x_te = x[te_indice]
+    x_tr = x[tr_indice]
+#     print(y_te.shape, x_te.shape)
+    # form data with polynomial degree
+    tx_tr = build_poly(x_tr, degree)
+    tx_te = build_poly(x_te, degree)
+    # ridge regression
+    w,_ = ridge_regression(y_tr, tx_tr, lambda_)
+    # calculate the loss for train and test data
+    e_tr = y_tr - tx_tr.dot(w)
+    e_te = y_te - tx_te.dot(w)
+    loss_tr = np.sqrt(2 * calculate_mse(e_tr))
+    loss_te = np.sqrt(2 * calculate_mse(e_te))
+    return loss_tr, loss_te,w
+
+def apply_cross_validation(y,x,k_fold,degree,lambda_,seed):
+    k_indices = build_k_indices(y, k_fold, seed)
+    w_list=[]
+    rmse_te_list=[]
+    rmse_tr_list=[]
+    for k in range(k_fold):
+        loss_tr, loss_te, w = cross_validation(y, x, k_indices, k, lambda_, degree)
+        w_list.append(w)
+        rmse_te_list.append(loss_te)
+        rmse_tr_list.append(loss_tr)
+    w=np.mean(np.array(w_list),axis=0)
+    rmse_te=np.mean(rmse_te_list)
+    rmse_tr=np.mean(rmse_tr_list)
+    return w,rmse_tr,rmse_te
+
+
 
 
 #ML METHODS
