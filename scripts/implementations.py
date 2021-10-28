@@ -48,7 +48,6 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
     y_tr = y[tr_indice]
     x_te = x[te_indice]
     x_tr = x[tr_indice]
-#     print(y_te.shape, x_te.shape)
     # form data with polynomial degree
     tx_tr = build_poly(x_tr, degree)
     tx_te = build_poly(x_te, degree)
@@ -71,11 +70,44 @@ def apply_cross_validation(y,x,k_fold,degree,lambda_,seed):
         w_list.append(w)
         rmse_te_list.append(loss_te)
         rmse_tr_list.append(loss_tr)
-    w=np.mean(np.array(w_list),axis=0)
     rmse_te=np.mean(rmse_te_list)
     rmse_tr=np.mean(rmse_tr_list)
-    return w,rmse_tr,rmse_te
+    return rmse_tr,rmse_te
 
+def cross_validation_logistic(y, x, k_indices, k, degree, max_iters, gamma):
+    # get k'th subgroup in test, others in train
+    te_indice = k_indices[k]
+    tr_indice = [y for i,x in enumerate(k_indices) for y in x if i!=k]
+    y_te = y[te_indice]
+    y_tr = y[tr_indice]
+    x_te = x[te_indice]
+    x_tr = x[tr_indice]
+    # form data with polynomial degree
+    tx_tr = build_poly(x_tr, degree)
+    tx_te = build_poly(x_te, degree)
+    initial_w=np.zeros(tx_tr.shape[1])
+    # logistic regression
+    w,_ = logistic_regression(y_tr, tx_tr, initial_w, max_iters, gamma)
+    # calculate the loss for train and test data
+    e_tr = y_tr - tx_tr.dot(w)
+    e_te = y_te - tx_te.dot(w)
+    loss_tr = np.sqrt(2 * calculate_mse(e_tr))
+    loss_te = np.sqrt(2 * calculate_mse(e_te))
+    return loss_tr, loss_te,w
+
+def apply_cross_validation_logistic(y,x,k_fold,degree, max_iters, gamma,seed):
+    k_indices = build_k_indices(y, k_fold, seed)
+    w_list=[]
+    rmse_te_list=[]
+    rmse_tr_list=[]
+    for k in range(k_fold):
+        loss_tr, loss_te, w = cross_validation_logistic(y, x, k_indices, k, degree, max_iters, gamma)
+        w_list.append(w)
+        rmse_te_list.append(loss_te)
+        rmse_tr_list.append(loss_tr)
+    rmse_te=np.mean(rmse_te_list)
+    rmse_tr=np.mean(rmse_tr_list)
+    return rmse_tr,rmse_te
 
 
 
