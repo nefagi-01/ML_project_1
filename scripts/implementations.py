@@ -97,7 +97,6 @@ def cross_validation_logistic(y, x, k_indices, k, degree, max_iters, gamma):
 
 def apply_cross_validation_logistic(y,x,k_fold,degree, max_iters, gamma,seed):
     k_indices = build_k_indices(y, k_fold, seed)
-    w_list=[]
     rmse_te_list=[]
     rmse_tr_list=[]
     for k in range(k_fold):
