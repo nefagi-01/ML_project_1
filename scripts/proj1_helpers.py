@@ -3,6 +3,8 @@
 import csv
 import numpy as np
 
+def sigmoid(t):
+    return np.reciprocal(1+np.exp(-t))
 
 def load_csv_data(data_path, sub_sample=False):
     """Loads data and returns y (class labels), tX (features) and ids (event ids)"""
@@ -36,7 +38,7 @@ def standardize(x):
 
 def predict_labels(weights, data):
     """Generates class predictions given weights, and a test data matrix"""
-    y_pred = np.dot(data, weights)
+    y_pred = sigmoid(np.dot(data, weights))
     y_pred[np.where(y_pred <= 0.5)] = -1
     y_pred[np.where(y_pred > 0.5)] = 1
     
