@@ -14,7 +14,13 @@ def compute_gradient(y, tx, w):
     return grad, err
 
 def sigmoid(t):
-    return np.reciprocal(1+np.exp(-t))
+    K=100
+    ##Resolve overflow
+    if np.all(t<K):
+        sigm=np.exp(t)/(1+np.exp(t))
+    else:
+        sigm=1/(1+np.exp(-t))
+    return sigm
 
 def compute_loss_logistic(y, tx, w):
     tmp = sigmoid(tx.dot(w))
@@ -31,6 +37,7 @@ def build_poly(x, degree):
     for deg in range(1, degree+1):
         poly = np.c_[poly, np.power(x, deg)]
     return poly
+
 
 def build_k_indices(y, k_fold, seed):
     num_row = y.shape[0]
@@ -62,12 +69,10 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
 
 def apply_cross_validation(y,x,k_fold,degree,lambda_,seed):
     k_indices = build_k_indices(y, k_fold, seed)
-    w_list=[]
     rmse_te_list=[]
     rmse_tr_list=[]
     for k in range(k_fold):
         loss_tr, loss_te, w = cross_validation(y, x, k_indices, k, lambda_, degree)
-        w_list.append(w)
         rmse_te_list.append(loss_te)
         rmse_tr_list.append(loss_tr)
     rmse_te=np.mean(rmse_te_list)
@@ -101,7 +106,6 @@ def apply_cross_validation_logistic(y,x,k_fold,degree, max_iters, gamma,seed):
     rmse_tr_list=[]
     for k in range(k_fold):
         loss_tr, loss_te, w = cross_validation_logistic(y, x, k_indices, k, degree, max_iters, gamma)
-        w_list.append(w)
         rmse_te_list.append(loss_te)
         rmse_tr_list.append(loss_tr)
     rmse_te=np.mean(rmse_te_list)
