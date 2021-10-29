@@ -14,18 +14,27 @@ def compute_gradient(y, tx, w):
     return grad, err
 
 def sigmoid(t):
-    K=100
     ##Resolve overflow
-    if np.all(t<K):
-        sigm=np.exp(t)/(1+np.exp(t))
-    else:
-        sigm=1/(1+np.exp(-t))
+    sigm=np.zeros(t.shape)
+    positive=t>=0
+    negative=t<0
+    sigm[positive]=1/(1+np.exp(-t[positive]))
+    sigm[negative]=np.exp(t[negative])/(1+np.exp(t[negative]))
     return sigm
 
 def compute_loss_logistic(y, tx, w):
-    tmp = sigmoid(tx.dot(w))
-    loss = y.T.dot(np.log(tmp)) + (1 - y).T.dot(np.log(1 - tmp))
-    return -np.squeeze(loss)
+    #tmp = sigmoid(tx.dot(w))
+    #loss = y.T.dot(np.log(tmp)) + (1 - y).T.dot(np.log(1 - tmp))
+    #return -np.squeeze(loss)
+    #Resolve overflow
+    t=tx.dot(w)
+    positive=t>=0
+    negative=t<0
+    first_term=np.sum(np.log(1+np.exp(-t[positive])))+np.sum(t[positive])+np.sum(np.log(1+np.exp(t[negative])))
+    second_term=y.dot(tx.dot(w)) 
+    loss=first_term-second_term
+    return loss/y.shape[0]
+
 
 def compute_gradient_logistic(y, tx, w):
     tmp = sigmoid(tx.dot(w))
