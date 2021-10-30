@@ -42,7 +42,7 @@ def compute_gradient_logistic(y, tx, w):
     return grad
 
 def build_poly(x, degree):
-    poly = np.ones((len(x), 1))
+    poly = np.ones(x.shape)
     for deg in range(1, degree+1):
         poly = np.c_[poly, np.power(x, deg)]
     return poly
@@ -103,10 +103,8 @@ def cross_validation_logistic(y, x, k_indices, k, degree, max_iters, gamma):
     # logistic regression
     w,_ = logistic_regression(y_tr, tx_tr, initial_w, max_iters, gamma)
     # calculate the loss for train and test data
-    e_tr = y_tr - tx_tr.dot(w)
-    e_te = y_te - tx_te.dot(w)
-    loss_tr = np.sqrt(2 * calculate_mse(e_tr))
-    loss_te = np.sqrt(2 * calculate_mse(e_te))
+    loss_tr = compute_loss_logistic(y_tr, tx_tr, w)
+    loss_te = compute_loss_logistic(y_te, tx_te, w)
     return loss_tr, loss_te,w
 
 def apply_cross_validation_logistic(y,x,k_fold,degree, max_iters, gamma,seed):
