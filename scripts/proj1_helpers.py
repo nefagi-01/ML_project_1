@@ -4,7 +4,13 @@ import csv
 import numpy as np
 
 def sigmoid(t):
-    return np.reciprocal(1+np.exp(-t))
+    ##Resolve overflow
+    sigm=np.zeros(t.shape)
+    positive=t>=0
+    negative=t<0
+    sigm[positive]=1/(1+np.exp(-t[positive]))
+    sigm[negative]=np.exp(t[negative])/(1+np.exp(t[negative]))
+    return sigm
 
 def load_csv_data(data_path, sub_sample=False):
     """Loads data and returns y (class labels), tX (features) and ids (event ids)"""
