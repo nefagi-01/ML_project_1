@@ -1,8 +1,51 @@
 import numpy as np
 from proj1_helpers import *
-
+import collections
 
 #HELPERS
+
+def split_data(tX,y,ignore_y=False):
+    tX_0=tX[tX[:,22]==0]
+    tX_1=tX[tX[:,22]==1]
+    tX_2=tX[tX[:,22]==2]
+    tX_3=tX[tX[:,22]==3]
+    y_list=None
+    if not ignore_y:
+        y_0=y[tX[:,22]==0]
+        y_1=y[tX[:,22]==1]
+        y_2=y[tX[:,22]==2]
+        y_3=y[tX[:,22]==3]
+        y_list=[y_0,y_1,y_2,y_3]
+    tX_list=[tX_0,tX_1,tX_2,tX_3]
+    #remove -999
+    for j,x in enumerate(tX_list):
+        remove_features=[22]
+        for i in range(x.shape[1]):
+            col=x[:,i]
+            total=col.shape[0]
+            counter_=collections.Counter(col)
+            nulls=counter_[-999]
+            if nulls==total:
+                remove_features.append(i)
+        tX_list[j]=np.delete(x,remove_features,1)
+        print(f'tX_{j} shape: {tX_list[j].shape}')
+        if not ignore_y:
+            print(f'y_{j} shape: {y_list[j].shape}')
+    #Remove outliers
+    for j,x in enumerate(tX_list):
+        k = 1
+        for i in range(0,x.shape[1]):
+            q1 = np.percentile(x[:,i],25)
+            q2 = np.percentile(x[:,i],50)
+            q3 = np.percentile(x[:,i],75)
+            tX_list[j][:,i][(x[:,i] < q1 - k*(q3-q1))] = q2
+            tX_list[j][:,i][(x[:,i] > q3 + k*(q3-q1))] = q2
+    #Standardize
+    for i,x in enumerate(tX_list):
+        tX_list[i] = standardize(x)
+    return tX_list, y_list
+
+
 def calculate_mse(e):
     return 1/2*np.mean(e**2)
 

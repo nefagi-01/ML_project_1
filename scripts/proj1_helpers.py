@@ -36,8 +36,10 @@ def standardize(x):
     for col in range(x.shape[1]):
         mean=np.mean(x[:,col])
         std=np.std(x[:,col])
-        x[:,col]=(x[:,col]-mean)/std
+        if std>0:
+            x[:,col]=(x[:,col]-mean)/std
     return x
+    
 
 
 def predict_labels(weights, data, logistic=False):
