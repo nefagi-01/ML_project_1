@@ -22,28 +22,33 @@ def load_csv_data(data_path, sub_sample=False):
         yb = yb[::50]
         input_data = input_data[::50]
         ids = ids[::50]
-
+        
     return yb, input_data, ids
 
 
 def standardize(x):
-    """Standardize the original data set."""
+    """Standardize the original data set.
     mean_x = np.mean(x, axis=0)
     x = x - mean_x
     std_x = np.std(x, axis=0)
     print(std_x)
     x = x / std_x
-    return x, mean_x, std_x
+    return x, mean_x, std_x"""
+    """Standardize the original data set."""
+    return (x-x.mean())/x.std()
 
 
 def predict_labels(weights, data):
     """Generates class predictions given weights, and a test data matrix"""
-    y_pred = sigmoid(np.dot(data, weights))
-    y_pred[np.where(y_pred <= 0.5)] = -1
-    y_pred[np.where(y_pred > 0.5)] = 1
+    #y_pred = sigmoid(np.dot(data, weights))
+    y_pred = np.dot(data,weights.T)
+    y_pred[np.where(y_pred <= 0)] = -1
+    y_pred[np.where(y_pred > 0)] = 1
     
     return y_pred
 
+def accuracy(y_pred,y_act):
+    return y_pred[y_pred == y_act].shape[0]/y_act.shape[0]
 
 def create_csv_submission(ids, y_pred, name):
     """
