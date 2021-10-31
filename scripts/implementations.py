@@ -114,10 +114,9 @@ def apply_cross_validation_logistic(y,x,k_fold,degree, max_iters, gamma,seed,int
     loss_te_list=[]
     loss_tr_list=[]
     # form data with polynomial degree
-    phi_x=build_poly(x, degree, interaction)
-    print(phi_x.shape)
+    #phi_x=build_poly(x, degree, interaction)
     for k in range(k_fold):
-        loss_tr, loss_te, w = cross_validation_logistic(y, phi_x, k_indices, k, degree, max_iters, gamma)
+        loss_tr, loss_te, w = cross_validation_logistic(y, x, k_indices, k, degree, max_iters, gamma)
         loss_te_list.append(loss_te)
         loss_tr_list.append(loss_tr)
     loss_te=np.mean(loss_te_list)
