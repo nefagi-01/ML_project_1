@@ -2,8 +2,75 @@ import numpy as np
 from proj1_helpers import *
 import collections
 
-#HELPERS
 
+
+#ML METHODS
+def least_squares_GD(y, tx, initial_w, max_iters, gamma):
+    #Gradient descent algorithm
+    w = initial_w
+    for n_iter in range(max_iters):
+        # compute gradient
+        grad, err = compute_gradient(y, tx, w)
+        # gradient w update
+        w = w - gamma * grad
+    loss = calculate_mse(err)
+    return w,loss
+
+def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
+    #Stochastic gradient descent
+    w = initial_w
+    batch_size = 1
+    for n_iter in range(max_iters):
+        for y_batch, tx_batch in batch_iter(y, tx, batch_size=batch_size, num_batches=1):
+            # compute gradient
+            grad, err = compute_gradient(y_batch, tx_batch, w)
+            # update w
+            w = w - gamma * grad
+    # calculate loss
+    loss = calculate_mse(err)
+    return w, loss
+
+def least_squares(y, tx):
+    a = tx.T.dot(tx)
+    b = tx.T.dot(y)
+    w = np.linalg.solve(a, b)
+    err = y - tx.dot(w)
+    loss = calculate_mse(err)
+    return w, loss
+
+def ridge_regression(y, tx, lambda_):
+    aI = 2 * tx.shape[0] * lambda_ * np.identity(tx.shape[1])
+    a = tx.T.dot(tx) + aI
+    b = tx.T.dot(y)
+    w = np.linalg.solve(a, b)
+    err = y - tx.dot(w)
+    loss = calculate_mse(err)
+    return w, loss
+
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    w=initial_w
+    for n_iter in range(max_iters):
+        # update w.
+        grad = compute_gradient_logistic(y, tx, w)
+        w = w - gamma * grad
+    loss = compute_loss_logistic(y, tx, w)
+    return w, loss
+
+
+def reg_logistic_regression(y,tx,lambda_,initial_w,max_iters,gamma):
+    w=initial_w
+    for n_iter in range(max_iters):
+        # update w.
+        grad = compute_gradient_logistic(y, tx, w) + 2 * lambda_ * w
+        w = w - gamma * grad
+    loss = compute_loss_logistic(y, tx, w) + lambda_ * np.squeeze(w.T.dot(w))
+    return w, loss
+
+
+
+
+
+#HELPERS
 def split_data(tX,y,ignore_y=False,print_=True):
     #split based on PRI_jet_num value
     tX_0=tX[tX[:,22]==0]
@@ -55,13 +122,13 @@ def calculate_mse(e):
 
 
 def compute_gradient(y, tx, w):
-   #Compute the gradients
+    #Compute the gradients
     err = y - tx.dot(w)
     grad = -tx.T.dot(err) / len(err)
     return grad, err
 
 def sigmoid(t):
-    ##Resolve overflow
+    #Resolve overflow
     sigm=np.zeros(t.shape)
     positive=t>=0
     negative=t<0
@@ -70,9 +137,6 @@ def sigmoid(t):
     return sigm
 
 def compute_loss_logistic(y, tx, w):
-    #tmp = sigmoid(tx.dot(w))
-    #loss = y.T.dot(np.log(tmp)) + (1 - y).T.dot(np.log(1 - tmp))
-    #return -np.squeeze(loss)
     #Resolve overflow
     t=tx.dot(w)
     positive=t>=0
@@ -110,7 +174,6 @@ def build_k_indices(y, k_fold, seed):
     return np.array(k_indices)
 
 def cross_validation(y, x, k_indices, k, lambda_, degree):
-    # get k'th subgroup in test, others in train
     te_indice = k_indices[k]
     tr_indice = [y for i,x in enumerate(k_indices) for y in x if i!=k]
     y_te = y[te_indice]
@@ -140,7 +203,6 @@ def apply_cross_validation(y,x,k_fold,degree,lambda_,seed):
     return rmse_tr,rmse_te
 
 def cross_validation_logistic(y, x, k_indices, k, max_iters, gamma):
-    # get k'th subgroup in test, others in train
     te_indice = k_indices[k]
     tr_indice = [y for i,x in enumerate(k_indices) for y in x if i!=k]
     y_te = y[te_indice]
@@ -159,8 +221,6 @@ def apply_cross_validation_logistic(y,x,k_fold, max_iters, gamma,seed):
     k_indices = build_k_indices(y, k_fold, seed)
     loss_te_list=[]
     loss_tr_list=[]
-    # form data with polynomial degree
-    #phi_x=build_poly(x, degree, interaction)
     for k in range(k_fold):
         loss_tr, loss_te, w = cross_validation_logistic(y, x, k_indices, k, max_iters, gamma)
         loss_te_list.append(loss_te)
@@ -171,66 +231,3 @@ def apply_cross_validation_logistic(y,x,k_fold, max_iters, gamma,seed):
 
 
 
-#ML METHODS
-def least_squares_GD(y, tx, initial_w, max_iters, gamma):
-    #Gradient descent algorithm
-    w = initial_w
-    for n_iter in range(max_iters):
-        # compute gradient
-        grad, err = compute_gradient(y, tx, w)
-        # gradient w update
-        w = w - gamma * grad
-        #print(f'w: {w}')
-    loss = calculate_mse(err)
-    return w,loss
-
-def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
-    #Stochastic gradient descent
-    w = initial_w
-    batch_size = 1
-    for n_iter in range(max_iters):
-        for y_batch, tx_batch in batch_iter(y, tx, batch_size=batch_size, num_batches=1):
-            # compute gradient
-            grad, err = compute_gradient(y_batch, tx_batch, w)
-            # update w
-            w = w - gamma * grad
-    # calculate loss
-    loss = calculate_mse(err)
-    return w, loss
-
-
-def least_squares(y, tx):
-    a = tx.T.dot(tx)
-    b = tx.T.dot(y)
-    w = np.linalg.solve(a, b)
-    err = y - tx.dot(w)
-    loss = calculate_mse(err)
-    return w, loss
-
-def ridge_regression(y, tx, lambda_):
-    aI = 2 * tx.shape[0] * lambda_ * np.identity(tx.shape[1])
-    a = tx.T.dot(tx) + aI
-    b = tx.T.dot(y)
-    w = np.linalg.solve(a, b)
-    err = y - tx.dot(w)
-    loss = calculate_mse(err)
-    return w, loss
-
-def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    w=initial_w
-    for n_iter in range(max_iters):
-        # update w.
-        grad = compute_gradient_logistic(y, tx, w)
-        w = w - gamma * grad
-    loss = compute_loss_logistic(y, tx, w)
-    return w, loss
-
-
-def reg_logistic_regression(y,tx,lambda_,initial_w,max_iters,gamma):
-    w=initial_w
-    for n_iter in range(max_iters):
-        # update w.
-        grad = compute_gradient_logistic(y, tx, w) + 2 * lambda_ * w
-        w = w - gamma * grad
-    loss = compute_loss_logistic(y, tx, w) + lambda_ * np.squeeze(w.T.dot(w))
-    return w, loss
