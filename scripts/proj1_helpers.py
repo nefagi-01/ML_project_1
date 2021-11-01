@@ -31,8 +31,37 @@ def load_csv_data(data_path, sub_sample=False):
         
     return yb, input_data, ids
 
+def delete_columns_nulls(x,percentage):
+    """remove the column contaning over a percentage of null values"""
+    remove_features=[]
+    for i in range(x.shape[1]):
+        col=x[:,i]
+        total=col.shape[0]
+        counter_=collections.Counter(col)
+        nulls=counter_[-999]
+        null_percentage=round(nulls/total,2)
+        print(f'NULL percentage is: {null_percentage}')
+        if null_percentage>percentage:
+            remove_features.append(i)
+            
+    x=np.delete(x,remove_features,1)
+    return x
 
+def remove_outliers(x):
+    """remove the outliers in the code using the following formula and setting the outliers to the median"""
+    k = 1
+    for i in range(0,x.shape[1]):
+        q1 = np.percentile(x[:,i],25)
+        q2 = np.percentile(x[:,i],50)
+        q3 = np.percentile(x[:,i],75)
+        x[:,i][(x[:,i] < q1 - k*(q3-q1))] = q2
+        x[:,i][(x[:,i] > q3 + k*(q3-q1))] = q2
+    
+    return x
+        
+        
 def standardize(x):
+    """standardize (feature scaling) the dataset x """
     for col in range(x.shape[1]):
         mean=np.mean(x[:,col])
         std=np.std(x[:,col])
