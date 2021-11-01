@@ -1,5 +1,12 @@
 # ml-project-1-ml_ssg
 
+Firstly, you need to make sure to insert the train.csv and test.csv file in the correct place. 
+So go at the following two links and donwload the files:
+- https://drive.google.com/file/d/1GlgHTsIrML1Mls04R8IQ8E-wWbz4YHF5/view?usp=sharing
+- https://drive.google.com/file/d/1VrkRo8mkOWQokTq4rRU0vkp1atgsX-rj/view?usp=sharing
+
+Then, move them to the data folder. This way our script will ensure it gets the right data from the right place.
+
 To run the code, make sure numpy and matplotlib are installed. Go in run.py and run the respective python file. You will receive an output.csv file in the same directory of the run.py file, with all the prediction made using the most accurate model.
 
 The implementations.py file contains all the respective machine learning models, with the addition of the polynomial expansion creation and the cross-validation.
