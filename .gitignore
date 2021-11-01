@@ -3,4 +3,5 @@ data/train.csv
 data/test.csv
 scripts/__pycache__/
 scripts/.ipynb_checkpoints/
+scripts/output6.csv
 
