@@ -9,7 +9,7 @@ Place the test.csv and train.csv files into the /code folder.
 
 To run the code, make sure numpy and matplotlib are installed.
 
-Go into the /code folder and execute the run.py file. You will receive an output_logistic.csv file in the same directory of the run.py file, with all the prediction made using the most accurate model.
+From command line go to the /code folder and execute the run.py file. You will receive an output_logistic.csv file in the same directory of the run.py file, with all the prediction made using the most accurate model.
 
 The implementations.py file contains all the respective machine learning models, with the addition of the polynomial expansion creation and the cross-validation.
 
