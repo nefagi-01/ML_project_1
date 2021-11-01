@@ -4,12 +4,15 @@ import collections
 
 #HELPERS
 
-def split_data(tX,y,ignore_y=False):
+def split_data(tX,y,ignore_y=False,print_=True):
+    #split based on PRI_jet_num value
     tX_0=tX[tX[:,22]==0]
     tX_1=tX[tX[:,22]==1]
     tX_2=tX[tX[:,22]==2]
     tX_3=tX[tX[:,22]==3]
     y_list=None
+    if print_:
+        print('Subdatasets:')
     if not ignore_y:
         y_0=y[tX[:,22]==0]
         y_1=y[tX[:,22]==1]
@@ -17,7 +20,7 @@ def split_data(tX,y,ignore_y=False):
         y_3=y[tX[:,22]==3]
         y_list=[y_0,y_1,y_2,y_3]
     tX_list=[tX_0,tX_1,tX_2,tX_3]
-    #remove -999
+    #remove columns with all -999
     for j,x in enumerate(tX_list):
         remove_features=[22]
         for i in range(x.shape[1]):
@@ -28,9 +31,10 @@ def split_data(tX,y,ignore_y=False):
             if nulls==total:
                 remove_features.append(i)
         tX_list[j]=np.delete(x,remove_features,1)
-        print(f'tX_{j} shape: {tX_list[j].shape}')
-        if not ignore_y:
-            print(f'y_{j} shape: {y_list[j].shape}')
+        if print_:
+            print(f'\ttX_{j} shape: {tX_list[j].shape}')
+            if not ignore_y:
+                print(f'\ty_{j} shape: {y_list[j].shape}')
     #Remove outliers
     for j,x in enumerate(tX_list):
         k = 1
